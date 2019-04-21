@@ -1,0 +1,19 @@
+sudo apt install automake
+sudo apt install libtool
+prceÄ¿Â¼ÔËÐÐautoreconf -vfi
+./configure --builddir=/mnt/d/code/nginx_encrypt/build --prefix=/mnt/d/code/nginx_encrypt/publish --with-pcre=/mnt/d/code/nginx_encrypt/pcre-8.43
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

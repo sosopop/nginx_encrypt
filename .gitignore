@@ -4,3 +4,4 @@ publish
 pcre-8.43
 nginx-1.14.2/Makefile
 nginx-1.14.2/help.txt
+.DS_Store

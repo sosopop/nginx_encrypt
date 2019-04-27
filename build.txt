@@ -3,7 +3,7 @@ sudo apt install libtool
 prce目录运行autoreconf -vfi
 ./configure --builddir=/mnt/d/code/nginx_encrypt/build --prefix=/mnt/d/code/nginx_encrypt/publish --with-pcre=/mnt/d/code/nginx_encrypt/pcre-8.43
 
-./configure --builddir=/Users/sosopop/code/nginx_encrypt/build --prefix=/Users/sosopop/code/nginx_encrypt/publish --without-http_rewrite_module
+./configure --builddir=/Users/sosopop/code/nginx_encrypt/build --prefix=/Users/sosopop/code/nginx_encrypt/publish --without-http_rewrite_module --without-mail_pop3_module
 
 
 
@@ -12,7 +12,8 @@ prce目录运行autoreconf -vfi
 
 
 
-
+master_process off;
+daemon off;
 
 
 

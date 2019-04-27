@@ -68,8 +68,16 @@ ngx_module_t  ngx_file_encrypt_module = {
 };
 
 
+static ngx_http_output_header_filter_pt  ngx_http_next_header_filter;
 static ngx_http_output_body_filter_pt    ngx_http_next_body_filter;
 
+
+static ngx_int_t
+ngx_http_encrypt_header_filter(ngx_http_request_t *r)
+{
+    r->main_filter_need_in_memory = 1;
+    return ngx_http_next_header_filter(r);
+}
 
 static ngx_int_t
 ngx_http_encrypt_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
@@ -80,68 +88,38 @@ ngx_http_encrypt_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
     ngx_http_request_t        *sr;
     ngx_file_encrypt_ctx_t   *ctx;
     ngx_file_encrypt_conf_t  *conf;
+    off_t clen;
+    off_t coff;
+    u_char* buf_pos;
 
     if (in == NULL || r->header_only) {
         return ngx_http_next_body_filter(r, in);
     }
 
-    ctx = ngx_http_get_module_ctx(r, ngx_file_encrypt_module);
+    //ctx = ngx_http_get_module_ctx(r, ngx_file_encrypt_module);
 
-    if (ctx == NULL) {
-        return ngx_http_next_body_filter(r, in);
-    }
-
+    //if (ctx == NULL) {
+        //return ngx_http_next_body_filter(r, in);
+    //}
     conf = ngx_http_get_module_loc_conf(r, ngx_file_encrypt_module);
-/*
-    if (!ctx->before_body_sent) {
-        ctx->before_body_sent = 1;
-
-        if (conf->before_body.len) {
-            if (ngx_http_subrequest(r, &conf->before_body, NULL, &sr, NULL, 0)
-                != NGX_OK)
-            {
-                return NGX_ERROR;
-            }
+    clen = r->headers_out.content_length_n;
+    coff = r->headers_out.content_offset;
+    if(clen == in->buf->last - in->buf->pos) {
+        for( buf_pos = in->buf->pos; buf_pos != in->buf->last; buf_pos++ ) {
+            *buf_pos = '1';
         }
     }
 
-    if (conf->after_body.len == 0) {
-        ngx_http_set_ctx(r, NULL, ngx_file_encrypt_module);
-        return ngx_http_next_body_filter(r, in);
-    }
-
-    last = 0;
-*/
-    for (cl = in; cl; cl = cl->next) {
-        if (cl->buf->last_buf) {
-            cl->buf->last_buf = 0;
-            cl->buf->last_in_chain = 1;
-            cl->buf->sync = 1;
-            last = 1;
-        }
-    }
-
-    rc = ngx_http_next_body_filter(r, in);
-
-    if (rc == NGX_ERROR || !last || conf->after_body.len == 0) {
-        return rc;
-    }
-
-    if (ngx_http_subrequest(r, &conf->after_body, NULL, &sr, NULL, 0)
-        != NGX_OK)
-    {
-        return NGX_ERROR;
-    }
-
-    ngx_http_set_ctx(r, NULL, ngx_file_encrypt_module);
-
-    return ngx_http_send_special(r, NGX_HTTP_LAST);
+    return ngx_http_next_body_filter(r, in);
 }
 
 
 static ngx_int_t
 ngx_file_encrypt_filter_init(ngx_conf_t *cf)
 {
+    ngx_http_next_header_filter = ngx_http_top_header_filter;
+    ngx_http_top_header_filter = ngx_http_encrypt_header_filter;
+
     ngx_http_next_body_filter = ngx_http_top_body_filter;
     ngx_http_top_body_filter = ngx_http_encrypt_body_filter;
     return NGX_OK;
@@ -157,16 +135,6 @@ ngx_file_encrypt_create_conf(ngx_conf_t *cf)
     if (conf == NULL) {
         return NULL;
     }
-
-    /*
-     * set by ngx_pcalloc():
-     *
-     *     conf->before_body = { 0, NULL };
-     *     conf->after_body = { 0, NULL };
-     *     conf->types = { NULL };
-     *     conf->types_keys = NULL;
-     */
-
     return conf;
 }
 

@@ -3,17 +3,15 @@ sudo apt install libtool
 prce目录运行autoreconf -vfi
 ./configure --builddir=/mnt/d/code/nginx_encrypt/build --prefix=/mnt/d/code/nginx_encrypt/publish --with-pcre=/mnt/d/code/nginx_encrypt/pcre-8.43
 
-./configure --builddir=/Users/sosopop/code/nginx_encrypt/build --prefix=/Users/sosopop/code/nginx_encrypt/publish --without-http_rewrite_module --without-mail_pop3_module
-
-
-
-
-
-
-
+调试
+CFLAGS="-g -O0" ./configure --builddir=/Users/sosopop/code/nginx_encrypt/build --prefix=/Users/sosopop/code/nginx_encrypt/publish --without-http_rewrite_module --without-mail_pop3_module --with-debug --add-module=/Users/sosopop/code/nginx_encrypt/ngx_file_encrypt_module/
 
 master_process off;
 daemon off;
 
+error_log  logs/error.log;
+error_log  logs/error.log  notice;
+error_log  logs/error.log  info;
+error_log  logs/error.log  debug;
 
 

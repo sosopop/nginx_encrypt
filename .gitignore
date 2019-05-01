@@ -1,7 +1,8 @@
 build
 publish
-.vscode
+.vscode/ipch
 pcre-8.43
 nginx-1.14.2/Makefile
 nginx-1.14.2/help.txt
 .DS_Store
+Untitled.xcworkspace

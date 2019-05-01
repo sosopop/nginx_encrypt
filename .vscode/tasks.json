@@ -1,0 +1,23 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "options": {
+                "cwd": "${workspaceFolder}/nginx-1.14.2/"
+            },
+            "label": "generate",
+            "type": "shell",
+            "command": "CFLAGS='-g -O0' ${workspaceFolder}/nginx-1.14.2/configure --builddir=${workspaceFolder}/build --prefix=${workspaceFolder}/publish --without-http_rewrite_module --without-mail_pop3_module --with-debug --add-module=${workspaceFolder}/ngx_file_encrypt_module/"
+        },
+        {
+            "options": {
+                "cwd": "/Users/sosopop/code/nginx_encrypt/nginx-1.14.2/"
+            },
+            "label": "build",
+            "type": "shell",
+            "command": "make&&make install"
+        }
+    ]
+}

@@ -13,7 +13,7 @@
         },
         {
             "options": {
-                "cwd": "/Users/sosopop/code/nginx_encrypt/nginx-1.14.2/"
+                "cwd": "${workspaceFolder}/nginx-1.14.2/"
             },
             "label": "build",
             "type": "shell",

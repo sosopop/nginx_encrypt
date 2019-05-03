@@ -124,6 +124,18 @@ ngx_output_chain_to_iovec(ngx_iovec_t *vec, ngx_chain_t *in, size_t limit,
             continue;
         }
 
+            ngx_log_error(NGX_LOG_ALERT, log, 0,
+                          "bad buf in output chain "
+                          "t:%d r:%d f:%d %p %p-%p %p %O-%O",
+                          in->buf->temporary,
+                          in->buf->recycled,
+                          in->buf->in_file,
+                          in->buf->start,
+                          in->buf->pos,
+                          in->buf->last,
+                          in->buf->file,
+                          in->buf->file_pos,
+                          in->buf->file_last);
         if (in->buf->in_file) {
             break;
         }

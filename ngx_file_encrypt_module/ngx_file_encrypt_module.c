@@ -77,7 +77,7 @@ ngx_http_encrypt_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
 {
     ngx_int_t rc;
     ngx_uint_t last;
-    ngx_chain_t *cl;
+    ngx_chain_t *cl = in;
     ngx_http_request_t *sr;
     ngx_file_encrypt_ctx_t *ctx;
     ngx_file_encrypt_conf_t *conf;
@@ -97,29 +97,31 @@ ngx_http_encrypt_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
     //}
     conf = ngx_http_get_module_loc_conf(r, ngx_file_encrypt_module);
 
-    if (in->buf->in_file &&
-        ngx_buf_in_memory(in->buf) &&
-        !in->next &&
-        in->buf->file_last - in->buf->file_pos == in->buf->last - in->buf->pos)
-    {
-        off_t file_pos = in->buf->file_pos;
-        off_t buf_size = in->buf->last - in->buf->pos;
-        ngx_int_t i = file_pos;
-        u_char* buf = in->buf->pos;
-        ngx_int_t key_len = conf->encrypt_key.len;
-        u_char* key = conf->encrypt_key.data;
-        
-        for (i = 0; i < buf_size; i++)
+    while(cl) {
+        if (cl->buf->in_file &&
+            ngx_buf_in_memory(cl->buf) &&
+            cl->buf->file_last - cl->buf->file_pos == cl->buf->last - cl->buf->pos)
         {
-            int c = file_pos + i + 1;
-            c = c ^ (c << 1) ^ (c << 2) ^ (c << 4) ^ (c << 6) ^ (c >> 1) ^ (c >> 2) ^ (c >> 4) ^ (c >> 6) ^ (c >> 12);
-            buf[i] = buf[i] ^ (u_char)(c) ^ key[file_pos%key_len];
+            off_t file_pos = cl->buf->file_pos;
+            off_t buf_size = cl->buf->last - cl->buf->pos;
+            ngx_int_t i = file_pos;
+            u_char* buf = cl->buf->pos;
+            ngx_int_t key_len = conf->encrypt_key.len;
+            u_char* key = conf->encrypt_key.data;
+            
+            for (i = 0; i < buf_size; i++)
+            {
+                int c = file_pos + i + 1;
+                c = c ^ (c << 1) ^ (c << 2) ^ (c << 4) ^ (c << 6) ^ (c >> 1) ^ (c >> 2) ^ (c >> 4) ^ (c >> 6) ^ (c >> 12);
+                buf[i] = buf[i] ^ (u_char)(c) ^ key[(file_pos+i)%key_len];
+            }
+            cl->buf->in_file = 0;
         }
-        in->buf->in_file = 0;
-    }
-    else
-    {
-        return NGX_HTTP_FORBIDDEN;
+        else
+        {
+            return NGX_HTTP_FORBIDDEN;
+        }
+        cl = cl->next;
     }
 
     return ngx_http_next_body_filter(r, in);
